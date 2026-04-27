@@ -347,31 +347,31 @@ body {
 .upload-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
 .upload-sub { font-size: 12px; color: var(--ink-light); }
 
-.file-previews { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1rem; }
+.file-previews { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 1rem; }
 .file-thumb {
   position: relative;
-  width: 80px;
+  width: 120px;
 }
 .file-thumb img {
-  width: 80px; height: 80px;
+  width: 120px; height: 120px;
   object-fit: cover;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
 }
 .file-doc {
-  width: 80px; height: 80px;
+  width: 120px; height: 120px;
   background: var(--surface-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 4px;
-  font-size: 10px;
+  gap: 6px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--ink-light);
   letter-spacing: .05em;
 }
-.file-doc svg { width: 20px; height: 20px; }
+.file-doc svg { width: 28px; height: 28px; }
 .file-name {
   font-size: 10px;
   color: var(--ink-light);
@@ -592,9 +592,9 @@ body {
   .upload-sub { font-size: 11px; }
 
   /* File thumbnails */
-  .file-thumb { width: 70px; }
-  .file-thumb img { width: 70px; height: 70px; }
-  .file-doc { width: 70px; height: 70px; }
+  .file-thumb { width: 90px; }
+  .file-thumb img { width: 90px; height: 90px; }
+  .file-doc { width: 90px; height: 90px; }
 
   /* Review rows */
   .review-row {
@@ -1513,25 +1513,64 @@ function generarPDF() {
     doc.text(`Documentos adjuntos (${attachedFiles.length}):`, M, y); y+=5;
     doc.setFont('helvetica','normal'); doc.setFontSize(9);
     attachedFiles.forEach((f,i)=>{ doc.text(`${i+1}. ${f.name}`, M+4, y); y+=5; });
-    y+=3;
 
     const imgs = attachedFiles.filter(f => f.type.startsWith('image/'));
     if (imgs.length > 0) {
-      doc.addPage();
-      doc.setFillColor(...OLIVE); doc.rect(0,0,210,12,'F');
-      doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
-      doc.text('E.P. MEDICINA VETERINARIA · URP — EVIDENCIAS ADJUNTAS', CX, 7.5, {align:'center'});
-      let ix=M, iy=22, iW=82, iH=65;
-      imgs.forEach((f,i)=>{
+      imgs.forEach((f, i) => {
         if (!imgDataURLs[f.name]) return;
+
+        // Each image gets its own page
+        doc.addPage();
+
+        // Header bar
+        doc.setFillColor(...OLIVE); doc.rect(0,0,210,12,'F');
+        doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+        doc.text(`E.P. MEDICINA VETERINARIA · URP — EVIDENCIA ${i+1} de ${imgs.length}`, CX, 7.5, {align:'center'});
+
+        // File name label
+        doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+        const nameLines = doc.splitTextToSize(f.name, W);
+        doc.text(nameLines, M, 18);
+        const labelH = nameLines.length * 4.5;
+
+        // Measure real image dimensions using a temporary Image element
+        // We already have the dataURL — create an img to get naturalWidth/Height
+        const imgEl = new Image();
+        imgEl.src = imgDataURLs[f.name];
+
+        // Available area: from below label to above footer
+        const areaTop = 18 + labelH + 3;
+        const areaBot = 280; // above footer bar at 285
+        const areaW = W;     // 170mm
+        const areaH = areaBot - areaTop;
+
+        // Compute scaled dimensions preserving aspect ratio
+        let iW, iH;
+        const natW = imgEl.naturalWidth || 1;
+        const natH = imgEl.naturalHeight || 1;
+        const ratio = natW / natH;
+        const areaRatio = areaW / areaH;
+
+        if (ratio > areaRatio) {
+          // wider than area — fit to width
+          iW = areaW;
+          iH = areaW / ratio;
+        } else {
+          // taller than area — fit to height
+          iH = areaH;
+          iW = areaH * ratio;
+        }
+
+        // Center in the available area
+        const ix = M + (areaW - iW) / 2;
+        const iy = areaTop + (areaH - iH) / 2;
+
         try {
-          doc.addImage(imgDataURLs[f.name],'JPEG',ix,iy,iW,iH);
-          doc.setFontSize(8); doc.setTextColor(...GRAY);
-          doc.text(f.name, ix, iy+iH+4, {maxWidth:iW});
-        } catch(e){}
-        ix += iW + 8;
-        if (ix+iW > M+W) { ix=M; iy+=iH+16; }
-        if (iy+iH > 270) { doc.addPage(); iy=20; ix=M; }
+          doc.addImage(imgDataURLs[f.name], 'JPEG', ix, iy, iW, iH, undefined, 'FAST');
+        } catch(e) {
+          doc.setFontSize(9); doc.setTextColor(...GRAY);
+          doc.text('No se pudo insertar la imagen.', CX, areaTop + areaH/2, {align:'center'});
+        }
       });
     }
   }
