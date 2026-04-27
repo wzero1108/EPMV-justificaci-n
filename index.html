@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#334a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Solicitud de Justificación de Inasistencia — EPMV · URP</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --wine: #4a6741;
+  --wine-dark: #334a2e;
+  --wine-light: #f0f5ef;
+  --wine-mid: #4a674140;
+  --gold: #8a9e3a;
+  --gold-light: #f5f8e8;
+  --ink: #1a1e14;
+  --ink-mid: #3d4535;
+  --ink-light: #7a8470;
+  --surface: #fdfdfb;
+  --surface-2: #f4f5f1;
+  --surface-3: #e8ebe3;
+  --border: #d4d9cc;
+  --border-light: #e8ebe3;
+  --success: #2d6a4f;
+  --success-bg: #e8f5ee;
+  --radius: 12px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(26,20,16,.08), 0 4px 16px rgba(26,20,16,.06);
+  --shadow-lg: 0 8px 40px rgba(26,20,16,.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--surface-2);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── HEADER ──────────────────────────────────── */
+.site-header {
+  background: var(--wine-dark);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,.25);
+}
+.header-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 64px;
+}
+.header-logo {
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.header-logo svg { width: 20px; height: 20px; color: rgba(255,255,255,.9); }
+.header-text h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px;
+  color: #fff;
+  font-weight: 400;
+  letter-spacing: .01em;
+}
+.header-text p {
+  font-size: 11px;
+  color: rgba(255,255,255,.55);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+.header-badge {
+  margin-left: auto;
+  background: rgba(200,147,58,.2);
+  border: 1px solid rgba(200,147,58,.4);
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* ── LAYOUT ──────────────────────────────────── */
+.app-layout {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 2rem 4rem;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ── SIDEBAR STEPS ───────────────────────────── */
+.sidebar {
+  position: sticky;
+  top: 88px;
+}
+.sidebar-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-bottom: 1rem;
+  padding-left: 4px;
+}
+.step-nav { display: flex; flex-direction: column; gap: 2px; }
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all .2s;
+  border: 1px solid transparent;
+}
+.step-item:hover { background: var(--surface-3); }
+.step-item.active {
+  background: var(--wine-light);
+  border-color: var(--wine-mid);
+}
+.step-item.done { opacity: .7; }
+.step-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-light);
+  flex-shrink: 0;
+  transition: all .2s;
+}
+.step-item.active .step-num {
+  background: var(--wine);
+  border-color: var(--wine);
+  color: #fff;
+}
+.step-item.done .step-num {
+  background: var(--success-bg);
+  border-color: var(--success);
+  color: var(--success);
+  font-size: 10px;
+}
+.step-label { font-size: 12px; font-weight: 500; color: var(--ink-mid); }
+.step-item.active .step-label { color: var(--wine-dark); font-weight: 600; }
+
+.sidebar-progress {
+  margin-top: 1.5rem;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+}
+.progress-label {
+  font-size: 11px;
+  color: var(--ink-light);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+.progress-label span { font-weight: 600; color: var(--wine); }
+.progress-bar {
+  height: 4px;
+  background: var(--border-light);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--wine);
+  border-radius: 2px;
+  transition: width .4s ease;
+}
+
+/* ── MAIN CONTENT ────────────────────────────── */
+.main-content { min-width: 0; }
+
+/* Page hero */
+.page-hero {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.page-hero-icon {
+  width: 48px; height: 48px;
+  background: var(--wine-light);
+  border: 1px solid var(--wine-mid);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.page-hero-icon svg { width: 22px; height: 22px; color: var(--wine); }
+.page-hero h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+.page-hero p { font-size: 13px; color: var(--ink-light); }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+.card-header-icon {
+  width: 32px; height: 32px;
+  background: var(--gold-light);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.card-header-icon svg { width: 16px; height: 16px; color: var(--gold); }
+.card-header h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: .01em;
+}
+.card-header p { font-size: 11px; color: var(--ink-light); margin-top: 1px; }
+
+/* Fields */
+.field-grid { display: grid; gap: .875rem; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.grid-2-1 { grid-template-columns: 2fr 1fr; }
+.grid-1-2 { grid-template-columns: 1fr 2fr; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+}
+.req { color: var(--wine); margin-left: 2px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--surface);
+  transition: border-color .15s, box-shadow .15s;
+  outline: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--wine);
+  box-shadow: 0 0 0 3px rgba(123,26,26,.08);
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--ink-light); }
+.field textarea { resize: vertical; min-height: 80px; }
+.field select { cursor: pointer; }
+.field.invalid input, .field.invalid select { border-color: #e24b4a; }
+.err-msg { font-size: 11px; color: #c0392b; display: none; }
+.field.invalid .err-msg { display: block; }
+
+/* Radio pills */
+.radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.radio-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  color: var(--ink-mid);
+  background: var(--surface);
+  user-select: none;
+}
+.radio-pill:hover { border-color: var(--wine); color: var(--wine); }
+.radio-pill.selected {
+  background: var(--wine-light);
+  border-color: var(--wine);
+  color: var(--wine-dark);
+}
+.radio-pill input { display: none; }
+.pill-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.radio-pill.selected .pill-dot {
+  background: var(--wine);
+  border-color: var(--wine);
+}
+
+/* Upload zone */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--surface-2);
+}
+.upload-zone:hover { border-color: var(--wine); background: var(--wine-light); }
+.upload-zone input { display: none; }
+.upload-icon { margin: 0 auto 12px; color: var(--ink-light); width: 40px; height: 40px; }
+.upload-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.upload-sub { font-size: 12px; color: var(--ink-light); }
+
+.file-previews { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1rem; }
+.file-thumb {
+  position: relative;
+  width: 80px;
+}
+.file-thumb img {
+  width: 80px; height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.file-doc {
+  width: 80px; height: 80px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-light);
+  letter-spacing: .05em;
+}
+.file-doc svg { width: 20px; height: 20px; }
+.file-name {
+  font-size: 10px;
+  color: var(--ink-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 4px;
+  text-align: center;
+}
+.file-remove {
+  position: absolute;
+  top: -6px; right: -6px;
+  width: 18px; height: 18px;
+  background: var(--wine);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* Review card */
+.review-section { margin-bottom: 1.25rem; }
+.review-section h4 {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--wine);
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.review-section h4::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--wine-mid);
+}
+.review-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+.review-row:last-child { border-bottom: none; }
+.review-key { color: var(--ink-light); font-weight: 500; }
+.review-val { color: var(--ink); font-weight: 500; }
+
+/* Navigation buttons */
+.nav-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  letter-spacing: .01em;
+  border: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-mid);
+  border: 1.5px solid var(--border);
+}
+.btn-ghost:hover { background: var(--surface-3); border-color: var(--ink-light); }
+.btn-primary {
+  background: var(--wine);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(123,26,26,.25);
+}
+.btn-primary:hover { background: var(--wine-dark); box-shadow: 0 4px 16px rgba(123,26,26,.35); }
+.btn-download {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(26,20,16,.2);
+  padding: 12px 28px;
+  font-size: 14px;
+  width: 100%;
+  justify-content: center;
+}
+.btn-download:hover { background: var(--wine-dark); }
+.btn svg { width: 14px; height: 14px; }
+.btn-download svg { width: 16px; height: 16px; }
+
+/* Page visibility */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Otros field */
+.otros-field { margin-top: 10px; display: none; }
+.otros-field.visible { display: block; }
+
+/* Alert */
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+.alert-info {
+  background: #e8f2fb;
+  border: 1px solid #b5d4f4;
+  color: #0c447c;
+}
+.alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── RESPONSIVE ──────────────────────────────── */
+@media (max-width: 680px) {
+  /* Layout */
+  .app-layout {
+    grid-template-columns: 1fr;
+    padding: 1rem 1rem 5rem;
+    gap: 1rem;
+  }
+
+  /* Header */
+  .header-inner { padding: 0 1rem; height: 52px; gap: .75rem; }
+  .header-logo { width: 30px; height: 30px; }
+  .header-logo svg { width: 16px; height: 16px; }
+  .header-text h1 { font-size: 13px; }
+  .header-text p { display: none; }
+  .header-badge { font-size: 9px; padding: 3px 8px; }
+
+  /* Sidebar — compact stepper bar */
+  .sidebar { position: static; }
+  .sidebar-title { display: none; }
+  .sidebar-progress { display: none; }
+  .step-nav {
+    flex-direction: row;
+    justify-content: center;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 10px 8px;
+    overflow-x: auto;
+  }
+  .step-item {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    flex: 1;
+    min-width: 60px;
+    border: none;
+    border-radius: var(--radius-sm);
+  }
+  .step-item:hover { background: var(--surface-3); }
+  .step-num { width: 26px; height: 26px; font-size: 11px; }
+  .step-label { font-size: 10px; text-align: center; line-height: 1.2; }
+
+  /* Page hero */
+  .page-hero {
+    padding: 1rem;
+    gap: .75rem;
+    margin-bottom: 1rem;
+  }
+  .page-hero-icon { width: 38px; height: 38px; border-radius: 8px; }
+  .page-hero-icon svg { width: 18px; height: 18px; }
+  .page-hero h2 { font-size: 17px; }
+  .page-hero p { font-size: 12px; }
+
+  /* Cards */
+  .card { padding: 1rem; }
+  .card-header { margin-bottom: 1rem; padding-bottom: .75rem; }
+  .card-header h3 { font-size: 13px; }
+
+  /* Field grids — always single column */
+  .grid-2, .grid-3, .grid-2-1, .grid-1-2,
+  .field-grid.grid-2 { grid-template-columns: 1fr; }
+
+  /* Inputs — bigger touch targets */
+  .field input, .field select, .field textarea {
+    font-size: 16px; /* Prevents iOS auto-zoom */
+    padding: 11px 12px;
+  }
+  .field label { font-size: 11px; }
+  .field textarea { min-height: 70px; }
+
+  /* Radio pills — full width on mobile */
+  .radio-group { gap: 6px; }
+  .radio-pill {
+    padding: 10px 14px;
+    font-size: 14px;
+    flex: 1 1 calc(50% - 6px);
+    justify-content: center;
+  }
+
+  /* Upload zone */
+  .upload-zone { padding: 1.25rem 1rem; }
+  .upload-icon { width: 32px; height: 32px; margin-bottom: 8px; }
+  .upload-title { font-size: 13px; }
+  .upload-sub { font-size: 11px; }
+
+  /* File thumbnails */
+  .file-thumb { width: 70px; }
+  .file-thumb img { width: 70px; height: 70px; }
+  .file-doc { width: 70px; height: 70px; }
+
+  /* Review rows */
+  .review-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: 8px 0;
+  }
+  .review-key {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .review-val { font-size: 13px; }
+
+  /* Nav footer — full width buttons */
+  .nav-footer { gap: 8px; }
+  .btn { padding: 12px 16px; font-size: 13px; }
+  .btn-download {
+    padding: 14px;
+    font-size: 14px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Alert */
+  .alert { font-size: 12px; padding: 10px 12px; }
+
+  /* Inline dynamic inputs in justif rows */
+  #justif-rows input[type="text"],
+  #justif-rows input[type="date"],
+  #justif-rows select {
+    font-size: 16px;
+    padding: 10px 11px;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div class="header-text">
+      <h1>Universidad Ricardo Palma</h1>
+      <p>E.P. Medicina Veterinaria · Trámites Académicos</p>
+    </div>
+    <div class="header-badge">EPMV 2025</div>
+  </div>
+</header>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Pasos del trámite</div>
+    <nav class="step-nav">
+      <div class="step-item active" id="nav1" onclick="goStep(1)">
+        <div class="step-num" id="sn1">1</div>
+        <div class="step-label">Datos personales</div>
+      </div>
+      <div class="step-item" id="nav2" onclick="goStep(2)">
+        <div class="step-num" id="sn2">2</div>
+        <div class="step-label">Datos académicos</div>
+      </div>
+      <div class="step-item" id="nav3" onclick="goStep(3)">
+        <div class="step-num" id="sn3">3</div>
+        <div class="step-label">Motivo y evidencias</div>
+      </div>
+      <div class="step-item" id="nav4" onclick="goStep(4)">
+        <div class="step-num" id="sn4">4</div>
+        <div class="step-label">Revisar y descargar</div>
+      </div>
+    </nav>
+    <div class="sidebar-progress">
+      <div class="progress-label">Progreso <span id="progress-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- STEP 1 -->
+    <div class="page active" id="page1">
+      <div class="page-hero">
+        <div class="page-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <h2>Datos personales</h2>
+          <p>Información de identificación del estudiante solicitante</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v4M16 4v4M3 10h18"/></svg>
+          </div>
+          <div>
+            <h3>Identificación</h3>
+            <p>Complete todos los campos marcados con *</p>
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="field" id="f-nombre">
+            <label>Apellidos y nombres completos <span class="req">*</span></label>
+            <input type="text" id="nombre" placeholder="Ej. García López, Juan Carlos">
+            <div class="err-msg">Este campo es obligatorio</div>
+          </div>
+          <div class="field-grid grid-2">
+            <div class="field" id="f-dni">
+              <label>DNI <span class="req">*</span></label>
+              <input type="text" id="dni" placeholder="12345678" maxlength="8">
+              <div class="err-msg">Ingrese un DNI de 8 dígitos</div>
+            </div>
+            <div class="field" id="f-codigo">
+              <label>Código de estudiante <span class="req">*</span></label>
+              <input type="text" id="codigo" placeholder="20XXXXXXX">
+              <div class="err-msg">Campo obligatorio</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Dirección</label>
+            <input type="text" id="direccion" placeholder="Av. / Jr. / Calle, N°">
+          </div>
+          <div class="field-grid grid-2">
+            <div class="field">
+              <label>Distrito</label>
+              <input type="text" id="distrito" placeholder="Surco, Miraflores…">
+            </div>
+            <div class="field">
+              <label>Teléfono / celular</label>
+              <input type="text" id="telefono" placeholder="9XX XXX XXX">
+            </div>
+          </div>
+          <div class="field" id="f-correo">
+            <label>Correo electrónico <span class="req">*</span></label>
+            <input type="email" id="correo" placeholder="correo@urp.edu.pe">
+            <div class="err-msg">Ingrese un correo válido</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <div></div>
+        <button class="btn btn-primary" id="btn-next1" onclick="next1()">
+          Continuar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="page" id="page2">
+      <div class="page-hero">
+        <div class="page-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        </div>
+        <div>
+          <h2>Datos académicos</h2>
+          <p>Asignatura, docente y fechas de la inasistencia a justificar</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
+          </div>
+          <div>
+            <h3>Asignaturas a justificar</h3>
+            <p>Puede agregar una o más asignaturas con sus respectivos docentes y fechas</p>
+          </div>
+        </div>
+        <div class="field-grid grid-2" style="margin-bottom:1.25rem">
+          <div class="field" id="f-plan">
+            <label>Plan de estudios <span class="req">*</span></label>
+            <select id="plan-sel" onchange="onPlanChange()">
+              <option value="">— Seleccione plan —</option>
+              <option value="24">Plan 24 (vigente)</option>
+              <option value="52">Plan 52 (anterior)</option>
+            </select>
+            <div class="err-msg">Seleccione un plan</div>
+          </div>
+          <div class="field">
+            <label>Ciclo / semestre</label>
+            <input type="text" id="ciclo" placeholder="2025-I">
+          </div>
+        </div>
+
+        <div id="justif-rows" style="display:flex;flex-direction:column;gap:12px;"></div>
+        <div class="err-msg" id="err-justif" style="margin-top:6px">Ingrese al menos una asignatura completa</div>
+
+        <button type="button" onclick="addJustifRow()" id="btn-add-justif"
+          style="margin-top:14px;display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border:1.5px dashed var(--wine);border-radius:var(--radius-sm);background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--wine);cursor:pointer;transition:all .15s;opacity:.5;pointer-events:none;"
+          disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar otra asignatura
+        </button>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-ghost" id="btn-prev2" onclick="goStep(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" id="btn-next2" onclick="next2()">
+          Continuar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="page" id="page3">
+      <div class="page-hero">
+        <div class="page-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div>
+          <h2>Motivo y sustento</h2>
+          <p>Indique el motivo y adjunte los documentos que sustentan su solicitud</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div><h3>Motivo de la inasistencia</h3></div>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label>Seleccione el motivo <span class="req">*</span></label>
+            <div class="radio-group" id="motivo-group">
+              <label class="radio-pill" id="mp-trabajo" onclick="selectMotivo(this,'Trabajo')">
+                <input type="radio" name="motivo" value="Trabajo">
+                <span class="pill-dot"></span> Trabajo
+              </label>
+              <label class="radio-pill" id="mp-salud" onclick="selectMotivo(this,'Salud / Enfermedad')">
+                <input type="radio" name="motivo" value="Salud / Enfermedad">
+                <span class="pill-dot"></span> Salud / Enfermedad
+              </label>
+              <label class="radio-pill" id="mp-personal" onclick="selectMotivo(this,'Motivos personales')">
+                <input type="radio" name="motivo" value="Motivos personales">
+                <span class="pill-dot"></span> Motivos personales
+              </label>
+              <label class="radio-pill" id="mp-otros" onclick="selectMotivo(this,'Otros')">
+                <input type="radio" name="motivo" value="Otros">
+                <span class="pill-dot"></span> Otros
+              </label>
+            </div>
+            <div class="otros-field" id="otros-input">
+              <input type="text" id="motivo-otros-txt" placeholder="Especifique el motivo…" style="margin-top:8px">
+            </div>
+          </div>
+          <div class="field">
+            <label>Descripción adicional</label>
+            <textarea id="descripcion" placeholder="Describa brevemente su situación y fundamente la solicitud de justificación…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div>
+            <h3>Documentos de sustento</h3>
+            <p>Certificado médico, constancia laboral, u otro documento probatorio</p>
+          </div>
+        </div>
+        <div class="upload-zone" onclick="document.getElementById('file-in').click()">
+          <input type="file" id="file-in" accept="image/*,.pdf" multiple onchange="addFiles(this.files)">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <div class="upload-title">Haga clic o arrastre archivos aquí</div>
+          <div class="upload-sub">Imágenes (JPG, PNG) · PDF · Hasta 10 archivos</div>
+        </div>
+        <div class="file-previews" id="file-previews"></div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-ghost" id="btn-prev3" onclick="goStep(2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" id="btn-next3" onclick="next3()">
+          Revisar solicitud
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="page" id="page4">
+      <div class="page-hero">
+        <div class="page-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        </div>
+        <div>
+          <h2>Revisar y descargar</h2>
+          <p>Verifique la información antes de generar el documento oficial</p>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        El PDF descargado sigue el formato oficial de la Solicitud de Trámites Diversos de la URP. Deberá firmarlo y presentarlo en la secretaría de la EPMV.
+      </div>
+
+      <div class="card">
+        <div class="review-section">
+          <h4>Datos personales</h4>
+          <div class="review-row"><div class="review-key">Nombre</div><div class="review-val" id="rv-nombre">—</div></div>
+          <div class="review-row"><div class="review-key">DNI</div><div class="review-val" id="rv-dni">—</div></div>
+          <div class="review-row"><div class="review-key">Código</div><div class="review-val" id="rv-codigo">—</div></div>
+          <div class="review-row"><div class="review-key">Dirección</div><div class="review-val" id="rv-dir">—</div></div>
+          <div class="review-row"><div class="review-key">Distrito</div><div class="review-val" id="rv-dist">—</div></div>
+          <div class="review-row"><div class="review-key">Teléfono</div><div class="review-val" id="rv-tel">—</div></div>
+          <div class="review-row"><div class="review-key">Correo</div><div class="review-val" id="rv-correo">—</div></div>
+        </div>
+        <div class="review-section">
+          <h4>Datos académicos</h4>
+          <div class="review-row"><div class="review-key">Plan</div><div class="review-val" id="rv-plan">—</div></div>
+          <div class="review-row"><div class="review-key">Ciclo</div><div class="review-val" id="rv-ciclo">—</div></div>
+          <div id="rv-justif-rows"></div>
+        </div>
+        <div class="review-section">
+          <h4>Motivo y sustento</h4>
+          <div class="review-row"><div class="review-key">Motivo</div><div class="review-val" id="rv-motivo">—</div></div>
+          <div class="review-row"><div class="review-key">Descripción</div><div class="review-val" id="rv-desc">—</div></div>
+          <div class="review-row"><div class="review-key">Archivos</div><div class="review-val" id="rv-files">Ninguno</div></div>
+        </div>
+
+        <button class="btn btn-download" id="btn-download" onclick="generarPDF()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Descargar Solicitud Oficial URP (PDF)
+        </button>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-ghost" id="btn-prev4" onclick="goStep(3)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Anterior
+        </button>
+        <div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ── DATA ─────────────────────────────────────────── */
+const ASIGNATURAS = {
+  '24': [
+    {code:'MV-101', name:'Manejo Veterinario'},
+    {code:'MV-102', name:'Introducción a las Ciencias Veterinarias'},
+    {code:'MV-103', name:'Química'},
+    {code:'MV-201', name:'Bioquímica'},
+    {code:'MV-202', name:'Biología Celular'},
+    {code:'MV-301', name:'Zootecnia General'},
+    {code:'MV-302', name:'Anatomía Veterinaria'},
+    {code:'MV-303', name:'Histología Animal'},
+    {code:'MV-304', name:'Bioestadística'},
+    {code:'MV-401', name:'Microbiología Veterinaria'},
+    {code:'MV-402', name:'Inmunología Veterinaria'},
+    {code:'MV-403', name:'Deontología y Legislación Veterinaria'},
+    {code:'MV-404', name:'Fisiología Animal'},
+    {code:'MV-405', name:'Alimentación y Nutrición Animal'},
+    {code:'MV-406', name:'Diseño Estadístico'},
+    {code:'MV-501', name:'Patología Veterinaria I'},
+    {code:'MV-502', name:'Control de Calidad e Inocuidad de los Alimentos'},
+    {code:'MV-503', name:'Farmacología y Toxicología Veterinaria'},
+    {code:'MV-504', name:'Patología Clínica Veterinaria'},
+    {code:'MV-505', name:'Semiología Veterinaria'},
+    {code:'MV-506', name:'Biotecnología de la Reproducción y Mejoramiento Animal'},
+    {code:'MV-507', name:'Experiencia Supervisada I'},
+    {code:'MV-601', name:'Patología Veterinaria II'},
+    {code:'MV-602', name:'Diagnóstico por Imágenes'},
+    {code:'MV-603', name:'Etología y Bienestar Animal'},
+    {code:'MV-604', name:'Anestesiología y Preoperatoria'},
+    {code:'MV-605', name:'Obstetricia y Enfermedades Reproductivas'},
+    {code:'MV-606', name:'Parasitología y Enfermedades Parasitarias'},
+    {code:'MV-701', name:'Sanidad y Producción de Cuyes y Conejos'},
+    {code:'MV-702', name:'Metodología de la Investigación'},
+    {code:'MV-703', name:'Enfermedades Infecciosas de los Animales Domésticos'},
+    {code:'MV-704', name:'Clínica Quirúrgica de Animales Menores'},
+    {code:'MV-705', name:'Clínica de Animales Silvestres y Exóticos'},
+    {code:'MV-706', name:'Patología Aviar'},
+    {code:'MV-707', name:'Experiencia Supervisada II'},
+    {code:'MV-801', name:'Sanidad y Producción Avícola'},
+    {code:'MV-802', name:'Epidemiología Veterinaria'},
+    {code:'MV-803', name:'Taller de Investigación I'},
+    {code:'MV-804', name:'Clínica Quirúrgica de Animales Mayores'},
+    {code:'MV-805', name:'Sanidad y Producción Acuícola'},
+    {code:'MV-806', name:'Sanidad y Producción de Rumiantes Menores'},
+    {code:'MV-901', name:'Taller de Investigación II'},
+    {code:'MV-902', name:'Gestión y Administración Veterinaria'},
+    {code:'MV-903', name:'Sanidad y Producción de Porcinos'},
+    {code:'MV-904', name:'Sanidad y Producción de Bovinos'},
+    {code:'MV-905', name:'Medicina de Animales de Compañía'},
+    {code:'MV-906', name:'Salud Pública Veterinaria'},
+    {code:'MV-907', name:'Sanidad y Producción de Equinos'},
+    {code:'MV-1001', name:'Internado en Medicina Veterinaria'},
+    {code:'EL', name:'Anatomía Comparada'},
+    {code:'EL', name:'Acceso a la Información Científica Veterinaria'},
+    {code:'EL', name:'Terapéutica Veterinaria'},
+    {code:'EL', name:'Urgencias Veterinarias en Animales Menores'},
+    {code:'EL', name:'Medicina de Felinos'},
+    {code:'EL', name:'Etología Clínica del Perro y del Gato'},
+    {code:'EL', name:'Dermatología Veterinaria'},
+    {code:'EL', name:'Oftalmología Veterinaria'},
+    {code:'EL', name:'Principios Básicos de Cardiología Veterinaria'},
+  ],
+  '52': [
+    {code:'MV-0105', name:'Química'},
+    {code:'MV-0108', name:'Introducción a las Ciencias Veterinarias'},
+    {code:'MV-0109', name:'Manejo de Animales Menores'},
+    {code:'MV-0209', name:'Biología Celular y Molecular'},
+    {code:'MV-0210', name:'Zootecnia General'},
+    {code:'MV-0212', name:'Bioquímica Animal'},
+    {code:'MV-0305', name:'Bioestadística'},
+    {code:'MV-0308', name:'Anatomía Veterinaria'},
+    {code:'MV-0309', name:'Histología Veterinaria'},
+    {code:'MV-0310', name:'Biofísica Aplicada a las Ciencias Veterinarias'},
+    {code:'MV-0403', name:'Diseño Experimental'},
+    {code:'MV-0408', name:'Deontología y Legislación Veterinaria'},
+    {code:'MV-0409', name:'Gestión y Economía Veterinaria'},
+    {code:'MV-0410', name:'Fisiología Veterinaria'},
+    {code:'MV-0411', name:'Agrostología'},
+    {code:'MV-0412', name:'Genética y Mejoramiento Animal'},
+    {code:'MV-0413', name:'Práctica Pre-Profesional I'},
+    {code:'MV-0503', name:'Microbiología Veterinaria'},
+    {code:'MV-0504', name:'Inmunología Veterinaria'},
+    {code:'MV-0506', name:'Farmacología y Toxicología Veterinaria'},
+    {code:'MV-0507', name:'Alimentación y Nutrición Animal'},
+    {code:'MV-0509', name:'Teriogenología'},
+    {code:'MV-0510', name:'Industrialización de los Productos de Origen Animal'},
+    {code:'MV-0605', name:'Patología Veterinaria I'},
+    {code:'MV-0608', name:'Enfermedades Infecciosas de los Animales Domésticos'},
+    {code:'MV-0609', name:'Formulación de Proyectos en Ciencias Veterinarias'},
+    {code:'MV-0610', name:'Parasitología y Enfermedades Parasitarias'},
+    {code:'MV-0612', name:'Anestesiología y Preoperatoria'},
+    {code:'MV-0613', name:'Práctica Pre-Profesional II'},
+    {code:'MV-0614', name:'Manejo de Fauna Silvestre'},
+    {code:'MV-0704', name:'Patología Veterinaria II'},
+    {code:'MV-0709', name:'Epidemiología Veterinaria y Control de Zoonosis'},
+    {code:'MV-0710', name:'Patología Clínica Veterinaria'},
+    {code:'MV-0711', name:'Control de Calidad e Inocuidad de los Alimentos'},
+    {code:'MV-0712', name:'Clínica Quirúrgica de Animales Menores'},
+    {code:'MV-0713', name:'Semiología Veterinaria'},
+    {code:'MV-0714', name:'Taller de Tesis'},
+    {code:'MV-0808', name:'Etología y Bienestar Animal'},
+    {code:'MV-0809', name:'Sanidad y Producción de Cuyes y Conejos'},
+    {code:'MV-0810', name:'Diagnóstico por Imágenes'},
+    {code:'MV-0811', name:'Clínica Quirúrgica de Animales Mayores'},
+    {code:'MV-0812', name:'Sanidad y Producción Acuícola'},
+    {code:'MV-0813', name:'Práctica Pre-Profesional III'},
+    {code:'MV-0814', name:'Clínica de Animales Silvestres y Exóticos'},
+    {code:'MV-0908', name:'Sanidad y Producción Avícola'},
+    {code:'MV-0909', name:'Salud Pública Veterinaria'},
+    {code:'MV-0910', name:'Sanidad y Producción de Porcinos'},
+    {code:'MV-0911', name:'Sanidad y Producción de Bovinos'},
+    {code:'MV-0912', name:'Sanidad y Producción de Rumiantes Menores'},
+    {code:'MV-0913', name:'Medicina de Animales de Compañía'},
+    {code:'MV-0914', name:'Sanidad y Producción de Equinos'},
+    {code:'MV-1009', name:'Internado I'},
+    {code:'MV-1010', name:'Internado II'},
+    {code:'MV-1011', name:'Internado III'},
+    {code:'MV-1012', name:'Internado IV'},
+  ]
+};
+
+/* ── STATE ────────────────────────────────────────── */
+let currentStep = 1;
+let attachedFiles = [];
+let imgDataURLs = {};
+let motivoSelected = '';
+
+/* ── STEP NAVIGATION ──────────────────────────────── */
+function goStep(n) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page' + n).classList.add('active');
+
+  document.querySelectorAll('.step-item').forEach((el, i) => {
+    el.classList.remove('active', 'done');
+    const num = document.getElementById('sn' + (i+1));
+    if (i+1 === n) {
+      el.classList.add('active');
+      num.textContent = i+1;
+    } else if (i+1 < n) {
+      el.classList.add('done');
+      num.innerHTML = '&#10003;';
+    } else {
+      num.textContent = i+1;
+    }
+  });
+
+  currentStep = n;
+  const pct = Math.round(((n-1)/4)*100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+/* ── VALIDATION ───────────────────────────────────── */
+function v(id) { const el=document.getElementById(id); return el ? el.value.trim() : ''; }
+function setErr(fid, show) {
+  const f = document.getElementById(fid);
+  if (f) {
+    f.classList.toggle('invalid', show);
+    if (show) {
+      f.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  }
+}
+
+function next1() {
+  let ok = true;
+  let firstErr = null;
+
+  const nombreOk = !!v('nombre');
+  setErr('f-nombre', !nombreOk);
+  if (!nombreOk && !firstErr) firstErr = 'f-nombre';
+  if (!nombreOk) ok = false;
+
+  const dniVal = v('dni');
+  const dniOk = dniVal.length >= 7 && /^\d+$/.test(dniVal);
+  setErr('f-dni', !dniOk);
+  if (!dniOk && !firstErr) firstErr = 'f-dni';
+  if (!dniOk) ok = false;
+
+  const codigoOk = !!v('codigo');
+  setErr('f-codigo', !codigoOk);
+  if (!codigoOk && !firstErr) firstErr = 'f-codigo';
+  if (!codigoOk) ok = false;
+
+  const correoOk = v('correo').includes('@');
+  setErr('f-correo', !correoOk);
+  if (!correoOk && !firstErr) firstErr = 'f-correo';
+  if (!correoOk) ok = false;
+
+  if (!ok) {
+    if (firstErr) {
+      const el = document.getElementById(firstErr);
+      if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+    return;
+  }
+  goStep(2);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function next2() {
+  let ok = true;
+
+  const planOk = !!v('plan-sel');
+  setErr('f-plan', !planOk);
+  if (!planOk) ok = false;
+
+  const rows = getJustifRows();
+  const errEl = document.getElementById('err-justif');
+  if (rows.length === 0) {
+    errEl.style.display='block';
+    ok = false;
+  } else {
+    errEl.style.display='none';
+  }
+
+  if (!ok) return;
+  goStep(3);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function next3() {
+  fillReview();
+  goStep(4);
+  document.getElementById('progress-pct').textContent = '75%';
+  document.getElementById('progress-fill').style.width = '75%';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ── PLAN + JUSTIF ROWS ───────────────────────────── */
+let justifCount = 0;
+let subCount = 0;
+let currentPlan = '';
+
+function onPlanChange() {
+  currentPlan = v('plan-sel');
+  setErr('f-plan', false);
+  const btn = document.getElementById('btn-add-justif');
+  if (currentPlan) {
+    btn.style.opacity='1'; btn.style.pointerEvents='auto'; btn.disabled=false;
+  } else {
+    btn.style.opacity='.5'; btn.style.pointerEvents='none'; btn.disabled=true;
+  }
+  document.getElementById('justif-rows').innerHTML = '';
+  justifCount = 0;
+  if (currentPlan) addJustifRow();
+}
+
+function buildAsigOptions(plan) {
+  const lista = ASIGNATURAS[plan] || [];
+  return '<option value="">— Asignatura —</option>' +
+    lista.map(a => `<option value="${a.name}">${a.code !== 'EL' ? a.code+' · '+a.name : a.name+' (electivo)'}</option>`).join('');
+}
+
+function addJustifRow() {
+  if (!currentPlan) return;
+  justifCount++;
+  const n = justifCount;
+  const container = document.getElementById('justif-rows');
+  const div = document.createElement('div');
+  div.id = 'jrow-' + n;
+  div.style.cssText = 'border:1px solid var(--border-light);border-radius:var(--radius);padding:14px;background:var(--surface-2);position:relative;';
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--wine);">Asignatura ${n}</span>
+      ${n > 1 ? `<button type="button" onclick="removeJustifRow(${n})" style="width:24px;height:24px;border:1px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;font-size:12px;color:var(--ink-light);display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='var(--surface-3)'" onmouseout="this.style.background='transparent'">&#x2715;</button>` : ''}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div>
+        <label style="font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-mid);display:block;margin-bottom:5px;">Asignatura <span style="color:var(--wine)">*</span></label>
+        <select id="jasig-${n}" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;color:var(--ink);background:var(--surface);outline:none;cursor:pointer;">
+          ${buildAsigOptions(currentPlan)}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-mid);display:block;margin-bottom:5px;">Docente(s) responsable(s) <span style="color:var(--wine)">*</span></label>
+        <div id="dlist-${n}" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" onclick="addDocenteToRow(${n})" style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px dashed var(--border);border-radius:var(--radius-sm);background:transparent;font-family:inherit;font-size:11px;font-weight:600;color:var(--ink-light);cursor:pointer;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar docente
+        </button>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-mid);display:block;margin-bottom:5px;">Fecha(s) de inasistencia <span style="color:var(--wine)">*</span></label>
+        <div id="flist-${n}" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" onclick="addFechaToRow(${n})" style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px dashed var(--border);border-radius:var(--radius-sm);background:transparent;font-family:inherit;font-size:11px;font-weight:600;color:var(--ink-light);cursor:pointer;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar fecha
+        </button>
+      </div>
+    </div>`;
+  container.appendChild(div);
+  addDocenteToRow(n);
+  addFechaToRow(n);
+}
+
+function removeJustifRow(n) {
+  const el = document.getElementById('jrow-' + n);
+  if (el) el.remove();
+}
+
+function addDocenteToRow(rowN) {
+  subCount++;
+  const sc = subCount;
+  const list = document.getElementById('dlist-' + rowN);
+  if (!list) return;
+  const div = document.createElement('div');
+  div.id = 'ditem-' + sc;
+  div.style.cssText = 'display:flex;gap:6px;align-items:center;';
+  div.innerHTML = `<input type="text" id="dinp-${sc}" placeholder="Dr. / Mg. / Lic. Apellidos y Nombres" style="flex:1;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;color:var(--ink);background:var(--surface);outline:none;transition:border-color .15s;" onfocus="this.style.borderColor='var(--wine)'" onblur="this.style.borderColor='var(--border)'">
+  <button type="button" onclick="removeSubItem('ditem-${sc}','dlist-${rowN}')" style="width:28px;height:28px;flex-shrink:0;border:1px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;font-size:12px;color:var(--ink-light);display:flex;align-items:center;justify-content:center;">&#x2715;</button>`;
+  list.appendChild(div);
+}
+
+function addFechaToRow(rowN) {
+  subCount++;
+  const sc = subCount;
+  const list = document.getElementById('flist-' + rowN);
+  if (!list) return;
+  const div = document.createElement('div');
+  div.id = 'fitem-' + sc;
+  div.style.cssText = 'display:flex;gap:6px;align-items:center;';
+  div.innerHTML = `<input type="date" id="finp-${sc}" style="flex:1;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;color:var(--ink);background:var(--surface);outline:none;transition:border-color .15s;" onfocus="this.style.borderColor='var(--wine)'" onblur="this.style.borderColor='var(--border)'">
+  <button type="button" onclick="removeSubItem('fitem-${sc}','flist-${rowN}')" style="width:28px;height:28px;flex-shrink:0;border:1px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;font-size:12px;color:var(--ink-light);display:flex;align-items:center;justify-content:center;">&#x2715;</button>`;
+  list.appendChild(div);
+}
+
+function removeSubItem(itemId, listId) {
+  const list = document.getElementById(listId);
+  const item = document.getElementById(itemId);
+  if (list && item && list.children.length > 1) item.remove();
+}
+
+function getJustifRows() {
+  const rows = [];
+  document.querySelectorAll('[id^="jrow-"]').forEach(row => {
+    const n = row.id.replace('jrow-','');
+    const asigEl = document.getElementById('jasig-' + n);
+    const asig = asigEl ? asigEl.value.trim() : '';
+    const docentes = Array.from(document.querySelectorAll(`#dlist-${n} input`)).map(i=>i.value.trim()).filter(Boolean);
+    const fechas = Array.from(document.querySelectorAll(`#flist-${n} input`)).map(i=>i.value.trim()).filter(Boolean);
+    if (asig && docentes.length > 0 && fechas.length > 0) rows.push({asig, docentes, fechas});
+  });
+  return rows;
+}
+
+function formatFecha(str) {
+  if (!str) return '';
+  const d = new Date(str + 'T00:00:00');
+  if (isNaN(d)) return str;
+  return d.toLocaleDateString('es-PE', {day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+function selectMotivo(el, val) {
+  document.querySelectorAll('.radio-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  motivoSelected = val;
+  el.querySelector('input').checked = true;
+  document.getElementById('otros-input').classList.toggle('visible', val === 'Otros');
+}
+
+/* ── FILES ────────────────────────────────────────── */
+function addFiles(files) {
+  Array.from(files).forEach(f => {
+    if (attachedFiles.find(x => x.name === f.name && x.size === f.size)) return;
+    attachedFiles.push(f);
+    if (f.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = e => { imgDataURLs[f.name] = e.target.result; renderPreviews(); };
+      reader.readAsDataURL(f);
+    }
+  });
+  renderPreviews();
+}
+
+function removeFile(name) {
+  attachedFiles = attachedFiles.filter(f => f.name !== name);
+  delete imgDataURLs[name];
+  renderPreviews();
+}
+
+function renderPreviews() {
+  const c = document.getElementById('file-previews');
+  c.innerHTML = '';
+  attachedFiles.forEach(f => {
+    const wrap = document.createElement('div');
+    wrap.className = 'file-thumb';
+    if (f.type.startsWith('image/') && imgDataURLs[f.name]) {
+      wrap.innerHTML = `<img src="${imgDataURLs[f.name]}" alt="${f.name}">
+        <div class="file-name">${f.name}</div>
+        <button class="file-remove" onclick="removeFile('${f.name}')">&#x2715;</button>`;
+    } else {
+      wrap.innerHTML = `<div class="file-doc">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        PDF</div>
+        <div class="file-name">${f.name}</div>
+        <button class="file-remove" onclick="removeFile('${f.name}')">&#x2715;</button>`;
+    }
+    c.appendChild(wrap);
+  });
+}
+
+/* ── REVIEW ───────────────────────────────────────── */
+function fillReview() {
+  let mot = motivoSelected || '—';
+  if (mot === 'Otros') { const ot = v('motivo-otros-txt'); if (ot) mot = 'Otros: ' + ot; }
+  const planLabel = {'24':'Plan 24 (vigente)','52':'Plan 52 (anterior)'}[v('plan-sel')] || '—';
+  const desc = v('descripcion');
+
+  document.getElementById('rv-nombre').textContent = v('nombre') || '—';
+  document.getElementById('rv-dni').textContent = v('dni') || '—';
+  document.getElementById('rv-codigo').textContent = v('codigo') || '—';
+  document.getElementById('rv-dir').textContent = v('direccion') || '—';
+  document.getElementById('rv-dist').textContent = v('distrito') || '—';
+  document.getElementById('rv-tel').textContent = v('telefono') || '—';
+  document.getElementById('rv-correo').textContent = v('correo') || '—';
+  document.getElementById('rv-plan').textContent = planLabel;
+  document.getElementById('rv-ciclo').textContent = v('ciclo') || '—';
+  const rvRows = getJustifRows();
+  const rvContainer = document.getElementById('rv-justif-rows');
+  rvContainer.innerHTML = '';
+  rvRows.forEach((r,i) => {
+    const num = rvRows.length > 1 ? ` ${i+1}` : '';
+    rvContainer.innerHTML += `
+      <div class="review-row"><div class="review-key">Asignatura${num}</div><div class="review-val">${r.asig}</div></div>
+      <div class="review-row"><div class="review-key">Docente(s)${num}</div><div class="review-val">${r.docentes.join(', ')}</div></div>
+      <div class="review-row"><div class="review-key">Fecha(s)${num}</div><div class="review-val">${r.fechas.map(formatFecha).join(', ')}</div></div>`;
+  });
+  document.getElementById('rv-motivo').textContent = mot;
+  document.getElementById('rv-desc').textContent = desc ? desc.substring(0,80)+(desc.length>80?'…':'') : '—';
+  document.getElementById('rv-files').textContent = attachedFiles.length > 0
+    ? attachedFiles.map(f=>f.name).join(', ')
+    : 'Ninguno';
+}
+
+/* ── PDF GENERATION ───────────────────────────────── */
+function generarPDF() {
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  const M=20, W=170, CX=105;
+  let y=15;
+
+  const OLIVE = [74,103,65];
+  const INK = [26,30,20];
+  const GRAY = [100,105,95];
+  const LGRAY = [210,215,205];
+
+  // Header bar
+  doc.setFillColor(...OLIVE);
+  doc.rect(0,0,210,12,'F');
+  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('E.P. MEDICINA VETERINARIA · UNIVERSIDAD RICARDO PALMA', CX, 7.5, {align:'center'});
+  y = 20;
+
+  // Title block — solo título de la solicitud
+  doc.setDrawColor(...OLIVE); doc.setLineWidth(0.6); doc.line(M,y,M+W,y); y+=6;
+  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...INK);
+  doc.text('SOLICITUD DE JUSTIFICACIÓN DE INASISTENCIA', CX, y, {align:'center'}); y+=5;
+  doc.setFontSize(9); doc.setFont('helvetica','italic'); doc.setTextColor(...GRAY);
+  doc.text('Escuela Profesional de Medicina Veterinaria — URP', CX, y, {align:'center'}); y+=6;
+  doc.setDrawColor(...LGRAY); doc.setLineWidth(0.3); doc.line(M,y,M+W,y); y+=6;
+
+  // Personal data
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(...INK);
+  doc.text(`Yo, ${v('nombre')||'_________________________________'}`, M, y);
+  doc.text(`DNI N° ${v('dni')||'__________'}`, 140, y); y+=6;
+  doc.text(`Dirección: ${v('direccion')||'________________________'}   Distrito: ${v('distrito')||'_______________'}`, M, y); y+=6;
+  doc.text(`Teléfono: ${v('telefono')||'_____________'}     Correo: ${v('correo')||'_________________________'}`, M, y); y+=6;
+  doc.text(`Código de estudiante: ${v('codigo')||'___________'}     Ciclo: ${v('ciclo')||'__________'}`, M, y); y+=8;
+
+  doc.setDrawColor(...LGRAY); doc.setLineWidth(0.3); doc.line(M,y,M+W,y); y+=5;
+
+  // EPMV section header
+  doc.setFillColor(240,245,239);
+  doc.setDrawColor(...OLIVE); doc.setLineWidth(0.5);
+  doc.rect(M, y, W, 6, 'FD');
+  doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...OLIVE);
+  doc.text('SECCIÓN EPMV — DATOS DE LA INASISTENCIA', M+3, y+4); y+=10;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(...INK);
+  const planLabel = {'24':'Plan 24 (vigente)','52':'Plan 52 (anterior)'}[v('plan-sel')]||'—';
+  doc.text(`Plan de estudios: ${planLabel}`, M, y); y+=6;
+
+  const justifRows = getJustifRows();
+  let mot = motivoSelected || '—';
+  if (mot==='Otros'){const ot=v('motivo-otros-txt');if(ot)mot='Otros: '+ot;}
+
+  // Print each asignatura block
+  justifRows.forEach((r, i) => {
+    if (i > 0) { doc.setDrawColor(...LGRAY); doc.setLineWidth(0.2); doc.line(M+10,y,M+W-10,y); y+=4; }
+    if (justifRows.length > 1) {
+      doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...OLIVE);
+      doc.text(`Asignatura ${i+1}:`, M, y); y+=5;
+    }
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(...INK);
+    const al = doc.splitTextToSize(`Asignatura: ${r.asig}`, W);
+    doc.text(al, M, y); y += al.length * 5 + 1;
+    if (r.docentes.length === 1) {
+      const dl = doc.splitTextToSize(`Docente responsable: ${r.docentes[0]}`, W);
+      doc.text(dl, M, y); y += dl.length * 5 + 1;
+    } else {
+      doc.text('Docentes responsables:', M, y); y+=5;
+      r.docentes.forEach((d,di)=>{ doc.text(`  ${di+1}. ${d}`, M, y); y+=5; });
+    }
+    const fechasStr = r.fechas.map(formatFecha).join(', ');
+    const fl = doc.splitTextToSize(`Fecha(s) de inasistencia: ${fechasStr}`, W);
+    doc.text(fl, M, y); y += fl.length * 5 + 2;
+  });
+
+  doc.text(`Motivo: ${mot}`, M, y); y+=8;
+
+  doc.setDrawColor(...LGRAY); doc.setLineWidth(0.3); doc.line(M,y,M+W,y); y+=6;
+
+  // Body
+  const desc = v('descripcion');
+  if (desc) {
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.text('Ante Usted, con el debido respeto, me presento y expongo:', M, y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+    const dLines = doc.splitTextToSize(desc, W);
+    doc.text(dLines, M, y); y += dLines.length * 5 + 4;
+  }
+
+  const asigList = justifRows.map(r => `"${r.asig}"`).join(', ');
+  const docList = [...new Set(justifRows.flatMap(r => r.docentes))];
+  const docenteLabel = docList.length > 1 ? `los/las docentes ${docList.join(', ')}` : `el/la docente ${docList[0]||'_____'}`;
+  const fechasList = [...new Set(justifRows.flatMap(r => r.fechas.map(formatFecha)))].join(', ');
+  const asigLabel = justifRows.length > 1 ? `las asignaturas ${asigList}` : `la asignatura ${asigList}`;
+  const solicText = `Que, habiéndome visto impedido(a) de asistir a las clases de ${asigLabel}, a cargo de ${docenteLabel}, en la(s) fecha(s) ${fechasList||'_____'}, por motivos de ${mot}, solicito respetuosamente se sirva considerar y aprobar la justificación de mi inasistencia, adjuntando los documentos sustentatorios correspondientes.`;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.text('Solicito:', M, y); y+=5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+  const sLines = doc.splitTextToSize(solicText, W);
+  doc.text(sLines, M, y); y += sLines.length * 5 + 6;
+
+  doc.text('Por lo antes expuesto, pido a usted se sirva acceder a mi solicitud por ser de justicia.', M, y); y+=12;
+
+  const today = new Date();
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  doc.text(`Surco, ${today.getDate()} de ${meses[today.getMonth()]} de ${today.getFullYear()}`, CX+25, y, {align:'right'}); y+=20;
+
+  doc.setDrawColor(...INK); doc.setLineWidth(0.4);
+  doc.line(CX-20, y, M+W, y);
+  doc.setFontSize(8.5); doc.setTextColor(...GRAY);
+  doc.text('Firma del solicitante', CX+8, y+4, {align:'center'});
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...INK);
+  doc.text(v('nombre')||'', CX+8, y+9, {align:'center'}); y+=18;
+
+  // Attachments list
+  if (attachedFiles.length > 0) {
+    doc.setDrawColor(...LGRAY); doc.setLineWidth(0.3); doc.line(M,y,M+W,y); y+=5;
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...INK);
+    doc.text(`Documentos adjuntos (${attachedFiles.length}):`, M, y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    attachedFiles.forEach((f,i)=>{ doc.text(`${i+1}. ${f.name}`, M+4, y); y+=5; });
+    y+=3;
+
+    const imgs = attachedFiles.filter(f => f.type.startsWith('image/'));
+    if (imgs.length > 0) {
+      doc.addPage();
+      doc.setFillColor(...OLIVE); doc.rect(0,0,210,12,'F');
+      doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+      doc.text('E.P. MEDICINA VETERINARIA · URP — EVIDENCIAS ADJUNTAS', CX, 7.5, {align:'center'});
+      let ix=M, iy=22, iW=82, iH=65;
+      imgs.forEach((f,i)=>{
+        if (!imgDataURLs[f.name]) return;
+        try {
+          doc.addImage(imgDataURLs[f.name],'JPEG',ix,iy,iW,iH);
+          doc.setFontSize(8); doc.setTextColor(...GRAY);
+          doc.text(f.name, ix, iy+iH+4, {maxWidth:iW});
+        } catch(e){}
+        ix += iW + 8;
+        if (ix+iW > M+W) { ix=M; iy+=iH+16; }
+        if (iy+iH > 270) { doc.addPage(); iy=20; ix=M; }
+      });
+    }
+  }
+
+  // Footer on all pages
+  const pages = doc.getNumberOfPages();
+  for (let i=1; i<=pages; i++) {
+    doc.setPage(i);
+    doc.setFillColor(...OLIVE); doc.rect(0,285,210,12,'F');
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
+    doc.text('EPMV-URP · Solicitud de Justificación de Inasistencia', M, 291);
+    doc.text(`Página ${i} de ${pages}`, M+W, 291, {align:'right'});
+  }
+
+  const fname = v('nombre')
+    ? `Justificacion_${v('nombre').split(',')[0].trim().replace(/\s+/g,'_')}_URP.pdf`
+    : 'Justificacion_EPMV_URP.pdf';
+  doc.save(fname);
+
+  document.getElementById('progress-pct').textContent = '100%';
+  document.getElementById('progress-fill').style.width = '100%';
+}
+
+// Bind nav buttons with both click and touchend for mobile reliability
+document.addEventListener('DOMContentLoaded', function() {
+  function bindBtn(id, fn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    ['click','touchend'].forEach(evt => {
+      el.addEventListener(evt, function(e){ e.preventDefault(); fn(); }, {passive:false});
+    });
+  }
+  bindBtn('btn-next1', next1);
+  bindBtn('btn-next2', next2);
+  bindBtn('btn-next3', next3);
+  bindBtn('btn-prev2', function(){ goStep(1); window.scrollTo({top:0,behavior:'smooth'}); });
+  bindBtn('btn-prev3', function(){ goStep(2); window.scrollTo({top:0,behavior:'smooth'}); });
+  bindBtn('btn-prev4', function(){ goStep(3); window.scrollTo({top:0,behavior:'smooth'}); });
+  bindBtn('btn-download', generarPDF);
+  bindBtn('btn-add-justif', addJustifRow);
+});
+
+</script>
+</body>
+</html>
